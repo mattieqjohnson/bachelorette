@@ -1,0 +1,70 @@
+---
+title: "Bachelorette data"
+author: "Mattie Johnson"
+date: "1/12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+#load necessary packages
+library(tidyverse)
+library(rvest)
+library(rlist)
+library(stringi)
+library(htmltab)
+```
+
+Data related to the tv show is available on Wikipedia including the age, occupation, when they were eliminated, among others by season for all the contestents. There have been a total of 16 seasons.
+
+#Contestant Information
+```{r}
+#consistent column names across seasons
+my_renames <- function(name_from_wiki) {
+  renames <- c(Job = "Occupation",Outcome = "Eliminated")
+  renames[[name_from_wiki]]
+}
+
+#loops to scrape data tables from wikipedia
+seasons_list<-list()
+for (i in c(1:11,13:14)){
+  season_data <- 
+  read_html(paste0('https://en.wikipedia.org/wiki/The_Bachelorette_(season_',i,')')) %>%
+  html_node(xpath = '//*[@id="mw-content-text"]/div[1]/table[2]') %>%
+  html_table(fill = TRUE) %>% as.data.frame() %>% 
+    mutate(season=i) %>% rename_at(vars(matches("^Job$|^Outcome$")), my_renames)
+  seasons_list[[i]] <- season_data %>% select(Name, Age, Hometown, Occupation, Eliminated, season)
+}
+#season 12,15
+for (i in c(12,15)){
+  season_data <-  
+    read_html(paste0('https://en.wikipedia.org/wiki/The_Bachelorette_(season_',i,')')) %>%
+  html_node(xpath = '//*[@id="mw-content-text"]/div[1]/table[3]') %>%
+  html_table(fill = TRUE) %>% as.data.frame() %>% 
+    mutate(season=i) %>% rename_at(vars(matches("^Job$|^Outcome$")), my_renames)
+  seasons_list[[i]] <- season_data %>% select(Name, Age, Hometown, Occupation, Eliminated, season)
+}
+#season 16
+seasons_list[[16]] <-
+  read_html('https://en.wikipedia.org/wiki/The_Bachelorette_(season_16)') %>%
+  html_node(xpath = '//*[@id="mw-content-text"]/div[1]/table[2]') %>%
+  html_table(header=TRUE,fill = TRUE) %>% as.data.frame() %>% 
+  rename_at(vars(matches("^Job$|^Outcome$")), my_renames) %>% 
+  select(Name, Age, Hometown, Occupation, Eliminated, season)
+
+#combine all seasons into one dataset
+contestant_data = do.call(rbind, seasons_list)
+
+#reformat hometown into a column for city and state
+contestant_data <- contestant_data %>% 
+  mutate(From=Hometown) %>%
+  separate(From,c("City", "State"), sep=",")
+```
+When scraping wikipedia for 
+
+
+#Bachelorette Information
+In addition to information related to each of the men, this is a dataframe of available information related to the bachelorette of any given season.
+
+```{r}
+
+```
