@@ -1,0 +1,18 @@
+---
+title: "Exploratory Data Analysis"
+author: "Mattie Johnson"
+date: "1/13/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+#necessary packages
+library(ggplot2)
+library(tidyverse)
+#saved data
+
+```
+
+```{r}
+contestant_data %>% ggplot() + geom_histogram(aes(x=Age)) + theme_bw()
+```
