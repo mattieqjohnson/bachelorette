@@ -44,13 +44,14 @@ for (i in c(12,15)){
   seasons_list[[i]] <- season_data %>% select(Name, Age, Hometown, Occupation, Eliminated, season)
 }
 #season 16
-seasons_list[[16]] <-
-  read_html('https://en.wikipedia.org/wiki/The_Bachelorette_(season_16)') %>%
-  html_node(xpath = '//*[@id="mw-content-text"]/div[1]/table[2]') %>%
-  html_table(header=TRUE,fill = TRUE) %>% as.data.frame() %>% 
+seasons_list[[16]] <- 'https://en.wikipedia.org/wiki/The_Bachelorette_(season_16)' %>%
+  htmltab(2, rm_nodata_cols = F) %>%
+  replace_na(list(Place = "", Ref = "")) %>%
+  `rownames<-` (seq_len(nrow(.))) %>% 
+  as.data.frame() %>% 
   rename_at(vars(matches("^Job$|^Outcome$")), my_renames) %>% 
+  mutate(season=16) %>%
   select(Name, Age, Hometown, Occupation, Eliminated, season)
-
 #combine all seasons into one dataset
 contestant_data = do.call(rbind, seasons_list)
 
@@ -58,6 +59,11 @@ contestant_data = do.call(rbind, seasons_list)
 contestant_data <- contestant_data %>% 
   mutate(From=Hometown) %>%
   separate(From,c("City", "State"), sep=",")
+```
+
+```{r}
+#saving out data
+#save(contestant_data,file="contestant_data.Rda")
 ```
 When scraping wikipedia for 
 
